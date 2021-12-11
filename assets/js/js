@@ -1,0 +1,400 @@
+var shoppingCart = (function () {
+  // =============================
+  // Private methods and propeties
+  // =============================
+  cart = [];
+
+  // Constructor
+  function Item(name, price, count) {
+    this.name = name;
+    this.price = price;
+    this.count = count;
+  }
+
+  // Save cart
+  function saveCart() {
+    sessionStorage.setItem("shoppingCart", JSON.stringify(cart));
+  }
+
+  // Load cart
+  function loadCart() {
+    cart = JSON.parse(sessionStorage.getItem("shoppingCart"));
+  }
+  if (sessionStorage.getItem("shoppingCart") != null) {
+    loadCart();
+  }
+
+  // =============================
+  // Public methods and propeties
+  // =============================
+  var obj = {};
+
+  // Add to cart
+  obj.addItemToCart = function (name, price, count) {
+    for (var item in cart) {
+      if (cart[item].name === name) {
+        cart[item].count++;
+        saveCart();
+        return;
+      }
+    }
+    var item = new Item(name, price, count);
+    cart.push(item);
+    saveCart();
+  };
+  // Set count from item
+  obj.setCountForItem = function (name, count) {
+    for (var i in cart) {
+      if (cart[i].name === name) {
+        cart[i].count = count;
+        break;
+      }
+    }
+  };
+  // Remove item from cart
+  obj.removeItemFromCart = function (name) {
+    for (var item in cart) {
+      if (cart[item].name === name) {
+        cart[item].count--;
+        if (cart[item].count === 0) {
+          cart.splice(item, 1);
+        }
+        break;
+      }
+    }
+    saveCart();
+  };
+
+  // Remove all items from cart
+  obj.removeItemFromCartAll = function (name) {
+    for (var item in cart) {
+      if (cart[item].name === name) {
+        cart.splice(item, 1);
+        break;
+      }
+    }
+    saveCart();
+  };
+
+  // Clear cart
+  obj.clearCart = function () {
+    cart = [];
+    saveCart();
+  };
+
+  // Count cart
+  obj.totalCount = function () {
+    var totalCount = 0;
+
+    for (var item in cart) {
+      totalCount += cart[item].count;
+    }
+
+    return totalCount;
+  };
+
+  // Total cart
+  obj.totalCart = function () {
+    var totalCart = 0;
+    for (var item in cart) {
+      totalCart += cart[item].price * cart[item].count;
+    }
+    if (totalCart > 0) {
+      $("#no-order").hide();
+      $("#order").show();
+      console.log("yeyyy");
+    } else {
+      $("#no-order").show();
+      $("#order").hide();
+    }
+    return Number(totalCart.toFixed(2));
+  };
+
+  // List cart
+  obj.listCart = function () {
+    var cartCopy = [];
+    for (i in cart) {
+      item = cart[i];
+      itemCopy = {};
+      for (p in item) {
+        itemCopy[p] = item[p];
+      }
+      itemCopy.total = Number(item.price * item.count).toFixed(2);
+      cartCopy.push(itemCopy);
+    }
+    return cartCopy;
+  };
+
+  // cart : Array
+  // Item : Object/Class
+  // addItemToCart : Function
+  // removeItemFromCart : Function
+  // removeItemFromCartAll : Function
+  // clearCart : Function
+  // countCart : Function
+  // totalCart : Function
+  // listCart : Function
+  // saveCart : Function
+  // loadCart : Function
+  return obj;
+})();
+
+// *****************************************
+// Triggers / Events
+// *****************************************
+// Add item
+$(".add-to-cart").click(function (event) {
+  event.preventDefault();
+  var name = $(this).data("name");
+  var price = Number($(this).data("price"));
+  shoppingCart.addItemToCart(name, price, 1);
+  displayCart();
+});
+
+// Clear items
+$(".clear-cart").click(function () {
+  shoppingCart.clearCart();
+  displayCart();
+});
+
+function displayCart() {
+  var cartArray = shoppingCart.listCart();
+  var output = "";
+  for (var i in cartArray) {
+    output += `<li class="list-group-item">
+      <div class="container">
+          <div class="row">
+              <div class="col-6">
+                  <div>
+                      <p>${cartArray[i].name}</p>
+                  </div>
+                  <div class="qty-input">
+                      <button class="qty-count qty-count--minus" data-action="minus"
+                          type="button" data-name="${cartArray[i].name} ">-</button>
+                      <input class="product-qty" type="number" name="product-qty" min="2000"
+                          value="2000">
+                      <button class="qty-count qty-count--add" data-action="add"
+                          type="button" data-name="${cartArray[i].name} ">+</button>
+                  </div>
+              </div>
+              <div class="col-4 >
+                  <p class="p-total">KSH ${cartArray[i].total}</p>
+              </div>
+              <div class="col-2 ">
+                <i class="fa btn fa-trash-alt delete-item" data-name="${cartArray[i].name}"></i>
+              </div>
+          </div>
+      </div>
+  </li>`;
+
+    $(function () {
+      $("#chkPassport").click(function () {
+        if ($(this).is(":checked")) {
+          $("#dvPassport").show();
+        } else {
+          $("#dvPassport").hide();
+        }
+      });
+    });
+
+    "<tr>" +
+      "<td>" +
+      cartArray[i].name +
+      "</td>" +
+      "<td>(" +
+      cartArray[i].price +
+      ")</td>" +
+      "<td><div class='input-group'><button class='minus-item input-group-addon btn btn-primary' data-name=" +
+      cartArray[i].name +
+      ">-</button>" +
+      "<input type='number' class='item-count form-control' data-name='" +
+      cartArray[i].name +
+      "' value='" +
+      cartArray[i].count +
+      "'>" +
+      "<button class='plus-item btn btn-primary input-group-addon' data-name=" +
+      cartArray[i].name +
+      ">+</button></div></td>" +
+      "<td><button class='delete-item btn btn-danger' data-name=" +
+      cartArray[i].name +
+      ">X</button></td>" +
+      " = " +
+      "<td>" +
+      cartArray[i].total +
+      "</td>" +
+      "</tr>";
+  }
+  $(".show-cart").html(output);
+  $(".total-cart").html(shoppingCart.totalCart());
+  $(".total-count").html(shoppingCart.totalCount());
+}
+
+// Delete item button
+
+$(".show-cart").on("click", ".delete-item", function (event) {
+  var name = $(this).data("name");
+  shoppingCart.removeItemFromCartAll(name);
+  displayCart();
+});
+
+// -1
+$(".show-cart").on("click", ".minus-item", function (event) {
+  var name = $(this).data("name");
+  shoppingCart.removeItemFromCart(name);
+  displayCart();
+});
+// +1
+$(".show-cart").on("click", ".plus-item", function (event) {
+  var name = $(this).data("name");
+  shoppingCart.addItemToCart(name);
+  displayCart();
+});
+
+// Item count input
+$(".show-cart").on("change", ".item-count", function (event) {
+  var name = $(this).data("name");
+  var count = Number($(this).val());
+  shoppingCart.setCountForItem(name, count);
+  displayCart();
+});
+
+displayCart();
+
+var QtyInput = (function () {
+  var $qtyInputs = $(".qty-input");
+
+  if (!$qtyInputs.length) {
+    return;
+  }
+
+  var $inputs = $qtyInputs.find(".product-qty");
+  var $countBtn = $qtyInputs.find(".qty-count");
+  var qtyMin = parseInt($inputs.attr("min"));
+  var qtyMax = parseInt($inputs.attr("max"));
+
+  $inputs.change(function () {
+    var $this = $(this);
+    var $minusBtn = $this.siblings(".qty-count--minus");
+    var $addBtn = $this.siblings(".qty-count--add");
+    var qty = parseInt($this.val());
+
+    if (isNaN(qty) || qty <= qtyMin) {
+      $this.val(qtyMin);
+      $minusBtn.attr("disabled", true);
+    } else {
+      $minusBtn.attr("disabled", false);
+
+      if (qty >= qtyMax) {
+        $this.val(qtyMax);
+        $addBtn.attr("disabled", true);
+      } else {
+        $this.val(qty);
+        $addBtn.attr("disabled", false);
+      }
+    }
+  });
+
+  $countBtn.click(function () {
+    var operator = this.dataset.action;
+    var $this = $(this);
+    var $input = $this.siblings(".product-qty");
+    var qty = parseInt($input.val());
+
+    if (operator == "add") {
+      qty += 1000;
+      if (qty >= qtyMin + 1) {
+        $this.siblings(".qty-count--minus").attr("disabled", false);
+      }
+
+      if (qty >= qtyMax) {
+        $this.attr("disabled", true);
+      }
+    } else {
+      qty = qty <= qtyMin ? qtyMin : (qty -= 1000);
+
+      if (qty == qtyMin) {
+        $this.attr("disabled", true);
+      }
+
+      if (qty < qtyMax) {
+        $this.siblings(".qty-count--add").attr("disabled", false);
+      }
+    }
+
+    $input.val(qty);
+  });
+})();
+
+var placeSearch, autocomplete;
+
+// List all address components (corresponds to form field IDs and Google address object)
+var componentForm = {
+  autocomplete: ["street_number", "route"],
+  inputCity: "locality",
+  inputState: "administrative_area_level_1",
+  inputZip: "postal_code",
+  inputCounty: "administrative_area_level_2",
+  inputCountry: "country",
+};
+
+// Create autocomplete object based on the autocomplete ("street") field
+// Location type restricted to geocode
+function initAutocomplete() {
+  autocomplete = new google.maps.places.Autocomplete(
+    /** @type {!HTMLInputElement} */ (document.getElementById("autocomplete")),
+    { type: ["geocode"] }
+  ); // Call fillInAddress when user selects an address from dropdown
+
+  autocomplete.addListener("place_changed", fillInAddress);
+}
+
+// Fill fields with values from Google Maps autocomplete object
+function fillInAddress() {
+  // Get place data from autocomplete object
+  var place = autocomplete.getPlace();
+  console.log(place);
+
+  // Enable each field, then fill them with the corresponding value from the place object
+  for (var component in componentForm) {
+    document.getElementById(component).disabled = false;
+    document.getElementById(component).value = search(
+      componentForm[component],
+      place.address_components
+    );
+  } // Original Google Implementation - do not use
+
+  // Get each component of the address from the place
+  // object and fill the corresponding field
+  //   for (var i = 0; i < place.address_components.length; i++) {
+
+  //     var addressType = place.address_components[i].types[0];
+
+  //     if (componentForm[addressType]) {
+  //       var val = place.address_components[i][componentForm[addressType]];
+  //       document.getElementById(addressType).value = val;
+  //     }
+  //   }
+
+  // Fill the autocomplete field with values from the place object
+  // If a street number is not found, set the field to route only.
+  if (search("street_number", place.address_components) != "") {
+    document.getElementById("autocomplete").value =
+      search("street_number", place.address_components) + " ";
+  }
+  document.getElementById("autocomplete").value += search(
+    "route",
+    place.address_components
+  );
+
+  // Search the passed object for a specified address component/type and return the short_name value of the matched component/type
+  // If requested type does not exist in the placeObject, return an empty string
+  function search(type, placeObject) {
+    for (var i = 0; i < placeObject.length; i++) {
+      if (placeObject[i].types[0] === type) {
+        return placeObject[i].short_name;
+      } else if (i === placeObject.length - 1) {
+        return "";
+      }
+    }
+  }
+}
